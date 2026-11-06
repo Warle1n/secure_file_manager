@@ -1,0 +1,6 @@
+psycopg2-binary>=2.9
+safezip>=0.1
+defusedxml>=0.7
+psutil>=5.9
+python-dotenv>=1.0
+pytest>=8.0

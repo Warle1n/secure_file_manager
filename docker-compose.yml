@@ -1,0 +1,43 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: sdlc-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-secret}
+      POSTGRES_DB: ${POSTGRES_DB:-practice_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+
+  app:
+    build: .
+    container_name: sdlc-app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_DSN: postgresql://${POSTGRES_USER:-admin}:${POSTGRES_PASSWORD:-secret}@postgres:5432/${POSTGRES_DB:-practice_db}
+      STORAGE_DIR: /app/storage
+      MAX_FILE_SIZE: "10485760"
+      MAX_UNZIP_SIZE: "104857600"
+      LANG: C.UTF-8
+      LC_ALL: C.UTF-8
+      PYTHONIOENCODING: utf-8
+    volumes:
+      - ./storage:/app/storage
+    stdin_open: true
+    tty: true
+    # для CLI: чтобы можно было вводить команды
+    command: python main.py
+
+volumes:
+  pgdata:
+
