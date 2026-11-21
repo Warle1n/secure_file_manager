@@ -13,4 +13,4 @@ def safe_file_path(user_path: str) -> str:
     if target != base and not target.startswith(base + os.sep):
         raise ValueError("Path Traversal: выход за пределы хранилища")
 
-    return target
+    return user_path
